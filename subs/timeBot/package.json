@@ -1,16 +1,16 @@
 {
-  "name": "subbots",
+  "name": "timebot",
   "version": "1.0.0",
-  "description": "POC for bot->bot routing",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "tobybrad",
-  "license": "MIT",
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "botbuilder": "^3.7.0",
-    "botframework-directlinejs": "^0.9.3",
+    "request": "^2.81.0",
     "restify": "^4.3.0"
   }
 }
