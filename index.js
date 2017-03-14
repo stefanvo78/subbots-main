@@ -134,6 +134,4 @@ function main() {
 
 if (require.main === module) {
   main();
-  timeBot();
-  dateBot();
 }
