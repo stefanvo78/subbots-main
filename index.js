@@ -68,11 +68,11 @@ function routeToSub(uri, req) {
   });
 }
 
-function router(session) {
+function router(req, res, next) {
 
   var tasks = [];
   for (var k in _subs) {
-    tasks.push(askLUIS(_subs[k][0], _subs[k][1], session.message.text, k));
+    tasks.push(askLUIS(_subs[k][0], _subs[k][1], req.body.text, k));
   }
 
   Promise.all(tasks)
@@ -91,15 +91,20 @@ function router(session) {
       });
 
       // Route the request to the sub bot
-      routeToSub(topIntent[0], session)
+      routeToSub(topIntent[0], req)
       .then((result) => {
         // Pipe response back
-
+          if (result.statusCode == 200) {
+            console.log("Delivered");
+          }
+          else {
+            console.log(result.statusCode);
+          }
       });
     }
     else {
       // Nothing to handle the utterance
-      session.send("main: No intent handler found")
+      console.log("main: No intent handler found")
     }
   });
 }
@@ -120,16 +125,13 @@ function main() {
       appPassword: process.env.MICROSOFT_APP_PASSWORD
   });
 
-  server.post('/api/messages', connector.listen());
+  server.post('/api/messages', router);
   server.post('/api/control', control);
 
-  var bot = new builder.UniversalBot(connector);
+  /*var bot = new builder.UniversalBot(connector);
   bot.dialog('/', [
-	(session, args) => {
-		router(session);
-	}
   ]);
-  _mainBot = bot;
+  _mainBot = bot;*/
 }
 
 if (require.main === module) {

@@ -25,6 +25,7 @@ function main() {
   var bot = new builder.UniversalBot(connector);
   bot.dialog('/', [
     (session, args) => {
+	  console.log('message in');
       session.send('timeBot: The time is ' + new Date().toTimeString());
     }
   ]);
