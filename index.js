@@ -59,6 +59,8 @@ function routeToSub(uri, req) {
   var headers = req.headers;
   delete headers["content-length"];
 
+  console.log("Routing to " + uri);
+
   return new Promise((resolve, reject) => {
     request({
       uri: uri,
@@ -68,6 +70,8 @@ function routeToSub(uri, req) {
       headers : headers
     }, 
     (err, response, body) => {
+      console.log(err);
+      console.log(response);
       resolve(response);
     })
   });
