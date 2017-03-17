@@ -148,6 +148,4 @@ function main() {
   server.post('/api/control', control);
 }
 
-if (require.main === module) {
-  main();
-}
+main();
