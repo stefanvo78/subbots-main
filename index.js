@@ -131,6 +131,8 @@ function main() {
 
   var config = nconf.env().argv().file({file:'localConfig.json', search:true});
 
+  console.log(nconf.get());
+
   var server = restify.createServer();
   server.use(restify.bodyParser({ mapParams: false }));
   server.listen(config.get("port") || config.get("PORT") || 3978, function () {
