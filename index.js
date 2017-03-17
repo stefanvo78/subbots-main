@@ -137,21 +137,13 @@ function main() {
      console.log('%s listening to %s', server.name, server.url); 
   });
 
-  //var opts = { secret : config.get('directLineSecret'), webSocket:false };
-  //var connector = new directLine.DirectLine(opts);
-
   var connector = new builder.ChatConnector({
-      appId: config.get("MICROSOFT_APP_ID"),
-      appPassword: config.get("MICROSOFT_APP_PASSWORD")
+    appId: config.get("MICROSOFT_APP_ID"),
+    appPassword: config.get("MICROSOFT_APP_PASSWORD")
   });
 
   server.post('/api/messages', router);
   server.post('/api/control', control);
-
-  /*var bot = new builder.UniversalBot(connector);
-  bot.dialog('/', [
-  ]);
-  _mainBot = bot;*/
 }
 
 if (require.main === module) {
