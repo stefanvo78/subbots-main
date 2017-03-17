@@ -14,7 +14,6 @@ function control(req, res, next) {
   var json = req.body;
   // RL: body would be signed and encrypted
   if (json.type === "luis") {
-    console.log("New sub added");
     _subs[json.endpoint] = [json.luisAppId, json.subKey];
   }
   next();
@@ -77,6 +76,7 @@ function routeToSub(uri, req) {
 function router(req, res, next) {
 
   if (req.body.type != 'message') {
+    console.log("Not a message");
     res.end();
     next();
     return;
@@ -88,6 +88,7 @@ function router(req, res, next) {
   }
 
   if (!tasks.length) {
+    console.log("No endpoints registered");
     res.end();
     next();
     return;
@@ -102,6 +103,8 @@ function router(req, res, next) {
     )
 
     if (intents.length) {
+
+      console.log("Attempting to route");
 
       // Find the top scoring intent
       var topIntent = intents.reduce((prev, curr) => { 
