@@ -13,6 +13,7 @@ function control(req, res, next) {
   var json = req.body;
   // RL: body would be signed and encrypted
   if (json.type === "luis") {
+    console.log("New sub added");
     _subs[json.endpoint] = [json.luisAppId, json.subKey];
   }
   next();
@@ -54,13 +55,17 @@ function askLUIS(appId, subKey, q, endpoint) {
 }
 
 function routeToSub(uri, req) {
+
+  var headers = req.headers;
+  delete headers["content-length"];
+
   return new Promise((resolve, reject) => {
     request({
       uri: uri,
       method : 'POST',
       json : true,
       body : req.body,
-      headers : req.headers
+      headers : headers
     }, 
     (err, response, body) => {
       resolve(response);
@@ -70,9 +75,21 @@ function routeToSub(uri, req) {
 
 function router(req, res, next) {
 
+  if (req.body.type != 'message') {
+    res.end();
+    next();
+    return;
+  }
+
   var tasks = [];
   for (var k in _subs) {
     tasks.push(askLUIS(_subs[k][0], _subs[k][1], req.body.text, k));
+  }
+
+  if (!tasks.length) {
+    res.end();
+    next();
+    return;
   }
 
   Promise.all(tasks)
@@ -93,18 +110,18 @@ function router(req, res, next) {
       // Route the request to the sub bot
       routeToSub(topIntent[0], req)
       .then((result) => {
-        // Pipe response back
-          if (result.statusCode == 200) {
-            console.log("Delivered");
+          if (result) {
+            result.pipe(res);
           }
-          else {
-            console.log(result.statusCode);
-          }
+          res.end();
+          next();
       });
     }
     else {
       // Nothing to handle the utterance
-      console.log("main: No intent handler found")
+      console.log("main: No intent handler found");
+      res.end();
+      next();
     }
   });
 }
