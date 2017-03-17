@@ -70,8 +70,6 @@ function routeToSub(uri, req) {
       headers : headers
     }, 
     (err, response, body) => {
-      console.log(err);
-      console.log(response);
       resolve(response);
     })
   });
