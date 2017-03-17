@@ -3,6 +3,7 @@
 var request = require('request');
 var restify = require('restify');
 var builder = require('botbuilder');
+var nconf = require('nconf');
 
 var _mainBot = null;
 var _focusBot = null;
@@ -128,9 +129,11 @@ function router(req, res, next) {
 
 function main() {
 
+  var config = nconf.env().argv().file({file:'localConfig.json', search:true});
+
   var server = restify.createServer();
   server.use(restify.bodyParser({ mapParams: false }));
-  server.listen(process.env.port || process.env.PORT || 3978, function () {
+  server.listen(config.get("port") || config.get("PORT") || 3978, function () {
      console.log('%s listening to %s', server.name, server.url); 
   });
 
@@ -138,8 +141,8 @@ function main() {
   //var connector = new directLine.DirectLine(opts);
 
   var connector = new builder.ChatConnector({
-      appId: process.env.MICROSOFT_APP_ID,
-      appPassword: process.env.MICROSOFT_APP_PASSWORD
+      appId: config.get("MICROSOFT_APP_ID"),
+      appPassword: config.get("MICROSOFT_APP_PASSWORD")
   });
 
   server.post('/api/messages', router);
