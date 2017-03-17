@@ -39,13 +39,13 @@ function askLUIS(appId, subKey, q, endpoint) {
   return new Promise((resolve, reject) => {
     var result = { topScoringIntent: { intent : "None", score : 0.9 } };
     if (q.indexOf('time') != -1) {
-      if (endpoint.indexOf("3980") != -1) {
+      if (endpoint.indexOf("time") != -1) {
         result.topScoringIntent.intent = "whatTimeIsIt";
         result.topScoringIntent.score = 0.89;
       }
     }
     else if (q.indexOf('date') != -1) {
-      if (endpoint.indexOf("3982") != -1) {
+      if (endpoint.indexOf("date") != -1) {
         result.topScoringIntent.intent = "whatDateIsIt";
         result.topScoringIntent.score = 0.85;
       }
