@@ -46,7 +46,7 @@ function askLUIS(appId, subKey, q, endpoint) {
       }
     }
     else if (q.indexOf('date') != -1) {
-      if (endpoint.indexOf("ngrok") != -1) {
+      if (endpoint.indexOf("date") != -1) {
         result.topScoringIntent.intent = "whatDateIsIt";
         result.topScoringIntent.score = 0.85;
       }
