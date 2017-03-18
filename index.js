@@ -66,8 +66,8 @@ function routeToSub(uri, req) {
       uri: uri,
       method : 'POST',
       json : true,
-      body : req.body,
-      headers : headers
+      body : req.body
+      //headers : headers
     }, 
     (err, response, body) => {
       resolve(response);
