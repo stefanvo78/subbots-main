@@ -16,6 +16,7 @@ function control(req, res, next) {
   if (json.type === "luis") {
     _subs[json.endpoint] = [json.luisAppId, json.subKey];
   }
+  res.send("Registered")
   next();
 }
 
@@ -56,10 +57,8 @@ function askLUIS(appId, subKey, q, endpoint) {
 
 function routeToSub(uri, req) {
 
-  var headers = req.headers;
-  delete headers["content-length"];
-  console.log("Routing to " + uri);
-  console.log(headers);
+  var headers = {};
+  headers.authorization = req.headers.authorization;
 
   return new Promise((resolve, reject) => {
     request({
@@ -82,7 +81,6 @@ function routeToSub(uri, req) {
 function router(req, res, next) {
 
   if (req.body.type != 'message') {
-    console.log("Not a message");
     res.end();
     next();
     return;
@@ -94,7 +92,6 @@ function router(req, res, next) {
   }
 
   if (!tasks.length) {
-    console.log("No endpoints registered");
     res.end();
     next();
     return;
@@ -110,8 +107,6 @@ function router(req, res, next) {
 
     if (intents.length) {
 
-      console.log("Attempting to route");
-
       // Find the top scoring intent
       var topIntent = intents.reduce((prev, curr) => { 
         return prev[1].topScoringIntent.score < curr[1].topScoringIntent.score ? prev : curr; 
@@ -120,11 +115,11 @@ function router(req, res, next) {
       // Route the request to the sub bot
       routeToSub(topIntent[0], req)
       .then((result) => {
-          if (result) {
-            result.pipe(res);
-          }
-          res.end();
-          next();
+        if (result) {
+          result.pipe(res);
+        }
+        res.end();
+        next();
       });
     }
     else {
@@ -139,8 +134,6 @@ function router(req, res, next) {
 function main() {
 
   var config = nconf.env().argv().file({file:'localConfig.json', search:true});
-
-  console.log(nconf.get());
 
   var server = restify.createServer();
   server.use(restify.bodyParser({ mapParams: false }));
