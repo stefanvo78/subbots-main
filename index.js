@@ -5,10 +5,10 @@ var restify = require('restify');
 var builder = require('botbuilder');
 var nconf = require('nconf');
 
-var _mainBot = null;
 var _focusBot = null;
+var _defaultRoute = null;
 
-// Map of subbots to LUIS models (RL: would also include regex recognisers)
+// Map of subbots to recognisers
 var _subs = {};
 function control(req, res, next) {
   var json = req.body;
@@ -16,7 +16,6 @@ function control(req, res, next) {
   if (json.type === "luis") {
     _subs[json.endpoint] = [json.luisAppId, json.subKey];
   }
-  res.send("Registered")
   next();
 }
 
@@ -86,14 +85,25 @@ function router(req, res, next) {
     return;
   }
 
+  if (_focusBot != null) {
+    routeToSub(_focusBot, req)
+    .then((result) => {
+      if (result) {
+        result.pipe(res);
+      }
+      res.end();
+      next();
+      return;
+    });
+  }
+
   var tasks = [];
   for (var k in _subs) {
     tasks.push(askLUIS(_subs[k][0], _subs[k][1], req.body.text, k));
   }
 
-  if (!tasks.length) {
-    res.end();
-    next();
+  if (tasks.length == 0) {
+    _defaultRoute(req, res, next);
     return;
   }
 
@@ -112,21 +122,22 @@ function router(req, res, next) {
         return prev[1].topScoringIntent.score < curr[1].topScoringIntent.score ? prev : curr; 
       });
 
-      // Route the request to the sub bot
-      routeToSub(topIntent[0], req)
+      // Set focus and route the 
+      // request to the sub bot
+      _focusBot = topIntent[0];
+      routeToSub(_focusBot, req)
       .then((result) => {
         if (result) {
           result.pipe(res);
         }
         res.end();
         next();
+        return;
       });
     }
     else {
-      // Nothing to handle the utterance
-      console.log("main: No intent handler found");
-      res.end();
-      next();
+      _defaultRoute(req, res, next);
+      return;
     }
   });
 }
@@ -146,8 +157,16 @@ function main() {
     appPassword: config.get("MICROSOFT_APP_PASSWORD")
   });
 
+  _defaultRoute = connector.listen();
   server.post('/api/messages', router);
   server.post('/api/control', control);
+
+  var bot = new builder.UniversalBot(connector);
+  bot.dialog('/', [
+    (session, args) => {
+      session.send('mainBot: no suitable handler found (subs:' + Object.keys(_subs).length + ')');
+    }
+  ]);
 }
 
 main();
